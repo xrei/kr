@@ -1,0 +1,12 @@
+{
+  "name": "kursach-bryanstev",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "rei",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "node-adodb": "^5.0.3"
+  }
+}
