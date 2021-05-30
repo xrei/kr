@@ -75,6 +75,24 @@ module.exports = (app) => {
     }
   })
 
+  route.patch('/:courseId/publish', getCurrentUserId, async (req, res, next) => {
+    // stupid checks yep
+    if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
+    const courseId = +req.params.courseId
+    if (!courseId) return res.status(404).json({message: 'Course with provided id not found'})
+
+    const conn = req.app.locals.dbCon
+    try {
+      await conn.execute(`UPDATE courses AS c SET status = 'published' WHERE c.id = ${courseId}`)
+      const updated = await conn.query(`SELECT * FROM courses WHERE courses.id = ${courseId}`)
+
+      return res.json(updated[0])
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  })
+
   // LESSONS
   // create lesson into course
   route.post('/lessons/:courseId/', getCurrentUserId, async (req, res, next) => {
