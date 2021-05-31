@@ -2,7 +2,8 @@ const {Router} = require('express')
 const getCurrentUserId = require('./middlewares/getUserId')
 const Course = require('../models/course')
 const CourseLesson = require('../models/courseLesson')
-const {createInsertQuery} = require('../lib/sqlMapper')
+const Product = require('../models/product')
+const {createInsertQuery, createUpdateQuery} = require('../lib/sqlMapper')
 const route = Router()
 
 module.exports = (app) => {
@@ -13,7 +14,10 @@ module.exports = (app) => {
     const conn = req.app.locals.dbCon
     try {
       const data = await conn.query(
-        `SELECT p.* from products AS p LEFT JOIN courses AS c ON p.course_id = c.id ORDER BY c.id;`
+        `SELECT p.*, c.title, c.description, c.status, c.price FROM products AS p 
+        INNER JOIN courses AS c ON p.course_id = c.id
+        WHERE c.status = 'published'
+        ORDER BY c.id;`
       )
 
       return res.json(data).status(200)
@@ -22,7 +26,7 @@ module.exports = (app) => {
       next(err)
     }
   })
-
+  // get course by id
   route.get('/:id', async (req, res, next) => {
     const id = +req.params.id
     const conn = req.app.locals.dbCon
@@ -40,7 +44,7 @@ module.exports = (app) => {
       next(err)
     }
   })
-
+  // create new course
   route.post('/', getCurrentUserId, async (req, res, next) => {
     // stupid checks yep
     if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
@@ -48,12 +52,13 @@ module.exports = (app) => {
 
     const conn = req.app.locals.dbCon
 
-    const {title, description} = req.body
+    const {title, description, price} = req.body
 
     const courseData = Course.create({
       title,
       description,
-      // from middleware 'getUserId'
+      price,
+      // from middleware 'getCurrentUserId'
       createdBy: req.currentUserId,
       status: 'draft',
     })
@@ -74,7 +79,7 @@ module.exports = (app) => {
       next(err)
     }
   })
-
+  // publish draft course
   route.patch('/:courseId/publish', getCurrentUserId, async (req, res, next) => {
     // stupid checks yep
     if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
@@ -84,6 +89,26 @@ module.exports = (app) => {
     const conn = req.app.locals.dbCon
     try {
       await conn.execute(`UPDATE courses AS c SET status = 'published' WHERE c.id = ${courseId}`)
+      const updated = await conn.query(`SELECT * FROM courses WHERE courses.id = ${courseId}`)
+
+      conn.execute(createInsertQuery({table: 'products', data: Product.create({courseId})}))
+
+      return res.json(updated[0])
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  })
+  // unpublish course
+  route.patch('/:courseId/unpublish', getCurrentUserId, async (req, res, next) => {
+    // stupid checks yep
+    if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
+    const courseId = +req.params.courseId
+    if (!courseId) return res.status(404).json({message: 'Course with provided id not found'})
+
+    const conn = req.app.locals.dbCon
+    try {
+      await conn.execute(`UPDATE courses AS c SET status = 'draft' WHERE c.id = ${courseId}`)
       const updated = await conn.query(`SELECT * FROM courses WHERE courses.id = ${courseId}`)
 
       return res.json(updated[0])
@@ -126,7 +151,7 @@ module.exports = (app) => {
       next(err)
     }
   })
-  // list lessons from course
+  // list of course lessons
   route.get('/lessons/:courseId/list', getCurrentUserId, async (req, res, next) => {
     const courseId = +req.params.courseId
     if (!courseId) return res.status(404).json({message: 'Course with provided id not found'})
@@ -145,4 +170,40 @@ module.exports = (app) => {
       next(err)
     }
   })
+  route.patch('/:courseId/lessons/:lessonId', getCurrentUserId, async (req, res, next) => {
+    // stupid checks yep
+    if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
+    const courseId = +req.params.courseId
+    const lessonId = +req.params.lessonId
+    if (!courseId && !lessonId)
+      return res.status(404).json({message: 'Course with provided id not found'})
+    if (!req.body) return res.status(422).json({message: 'bad'})
+    const {title, content, price} = req.body
+
+    const conn = req.app.locals.dbCon
+
+    try {
+      const data = await conn.execute(
+        createUpdateQuery({
+          table: 'course_lessons',
+          data: omit({title, content}),
+          conditions: {id: lessonId, course_id: courseId},
+        })
+      )
+      const updated = await conn.query(
+        `SELECT * FROM course_lessons AS cl WHERE cl.id = ${lessonId}`
+      )
+
+      return res.json(updated[0]).status(200)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  })
+}
+
+function omit(o) {
+  let clone = {...o}
+  Object.keys(clone).forEach((key) => clone[key] === undefined && delete clone[key])
+  return clone
 }
