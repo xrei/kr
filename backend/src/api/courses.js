@@ -37,8 +37,10 @@ module.exports = (app) => {
 
     try {
       const data = await conn.query(`
-        SELECT *, (SELECT u.full_name FROM users AS u WHERE u.id = c.created_by) AS author_name
-        FROM courses AS c WHERE c.id=${id};
+        SELECT c.*, u.full_name AS author_name, u.email AS author_email
+        FROM courses AS c
+        LEFT JOIN users AS u ON u.id = c.created_by
+        WHERE c.id=${id};
       `)
 
       if (!data[0]) return res.status(404).json({message: 'Course with provided id not found'})
@@ -78,6 +80,31 @@ module.exports = (app) => {
       const newCourse = await conn.query(`SELECT * FROM courses WHERE courses.id = ${data[0]?.id}`)
 
       return res.json(newCourse[0])
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  })
+  route.patch('/:courseId', getCurrentUserId, async (req, res, next) => {
+    if (!req.body) return res.status(400)
+    // stupid checks yep
+    if (!req.currentUserId) return res.status(403).json({message: 'Access denied'})
+    const courseId = +req.params.courseId
+    if (!courseId) return res.status(404).json({message: 'Course with provided id not found'})
+
+    const {title, description, price} = req.body
+    const conn = req.app.locals.dbCon
+    try {
+      const data = await conn.execute(
+        createUpdateQuery({
+          table: 'courses',
+          data: omit({title, description, price}),
+          conditions: {id: courseId},
+        })
+      )
+      const updated = await conn.query(`SELECT * FROM courses AS c WHERE c.id = ${courseId}`)
+
+      return res.json(updated[0]).status(200)
     } catch (err) {
       console.log(err)
       next(err)
