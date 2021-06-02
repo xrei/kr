@@ -1,39 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import React, {useState, useEffect} from 'react'
+import {Route, useLocation} from 'react-router-dom'
+import {StylesProvider} from '@material-ui/styles'
+import {ThemeProvider, createMuiTheme} from '@material-ui/core/styles'
+import indigo from '@material-ui/core/colors/indigo'
+import pink from '@material-ui/core/colors/pink'
+import red from '@material-ui/core/colors/red'
+import {appRoutes, history} from './routes'
+import {MainLayout} from './ui/layout/MainLayout'
+import {Router} from 'react-router'
 
-interface AppProps {}
+function App() {
+  const theme = createMuiTheme({
+    palette: {
+      primary: indigo,
+      secondary: pink,
+      error: red,
+    },
+  })
+  // const loc = useLocation()
+  // const [routeTitle, changeRouteTitle] = useState('/')
+  // useEffect(() => {
+  //   changeRouteTitle(appRoutes.find((r) => r.path === loc.pathname)?.title || 'Главная')
+  // }, [loc])
 
-function App({}: AppProps) {
-  // Create the count state.
-  const [count, setCount] = useState(0);
-  // Create the counter (+1 every second).
-  useEffect(() => {
-    const timer = setTimeout(() => setCount(count + 1), 1000);
-    return () => clearTimeout(timer);
-  }, [count, setCount]);
-  // Return the App component.
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>
-          Page has been open for <code>{count}</code> seconds.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
-    </div>
-  );
+    <StylesProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <MainLayout title="">
+            {appRoutes.map(({path, view}, i) => (
+              <Route exact key={i} path={path} component={view} />
+            ))}
+          </MainLayout>
+        </Router>
+      </ThemeProvider>
+    </StylesProvider>
+  )
 }
 
-export default App;
+export default App
