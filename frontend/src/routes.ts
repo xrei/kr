@@ -1,4 +1,4 @@
-import {Main, Courses, Course, Products} from './pages'
+import {Main, Courses, Course, Products, CoursePage} from './pages'
 import {createBrowserHistory} from 'history'
 
 type Routes = {
@@ -14,17 +14,22 @@ export const Routes: Routes = {
   root: {
     path: '/',
     title: 'Main',
-    view: Main,
+    view: Products,
+  },
+  course: {
+    path: '/course/:id',
+    title: '',
+    view: CoursePage,
   },
   courses: {
     path: '/author/courses',
     title: 'Мои курсы',
     view: Courses,
   },
-  course: {
+  courseConstructor: {
     path: '/author/course/:id',
-    title: 'Страница курса',
-    view: Courses,
+    title: 'Конструктор курса',
+    view: Course,
   },
   products: {
     path: '/products',

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": ["DOM", "DOM.Iterable", "esnext"],
+    "types": ["vite/client"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,10 +15,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
+    "baseUrl": ".",
     "paths": {
-      "src": ["./src/*"]
-    },
-    "baseUrl": "."
+      "src/*": ["./src/*"]
+    }
   },
   "include": ["./src"]
 }

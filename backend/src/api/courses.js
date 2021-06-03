@@ -15,7 +15,8 @@ module.exports = (app) => {
     try {
       const data = await conn.query(
         `SELECT p.*, c.title, c.description, c.status, c.price, 
-        (SELECT u.full_name FROM users AS u WHERE u.id = c.created_by) AS author_name
+        (SELECT u.full_name FROM users AS u WHERE u.id = c.created_by) AS author_name,
+        (SELECT u.email FROM users AS u WHERE u.id = c.created_by) AS author_email
         FROM products AS p 
         INNER JOIN courses AS c ON p.course_id = c.id
         WHERE c.status = 'published';
@@ -28,7 +29,8 @@ module.exports = (app) => {
       next(err)
     }
   })
-  // get course by id
+
+  // get course product by id
   route.get('/:id', async (req, res, next) => {
     const id = +req.params.id
     const conn = req.app.locals.dbCon
@@ -37,15 +39,40 @@ module.exports = (app) => {
 
     try {
       const data = await conn.query(`
-        SELECT c.*, u.full_name AS author_name, u.email AS author_email
-        FROM courses AS c
+        SELECT p.*, u.full_name AS author_name, u.email AS author_email, c.title, c.description, c.status, c.price
+        FROM ((products AS p)
+        LEFT JOIN courses AS c ON c.id = p.course_id)
         LEFT JOIN users AS u ON u.id = c.created_by
-        WHERE c.id=${id};
+        WHERE c.id = ${id}
       `)
 
       if (!data[0]) return res.status(404).json({message: 'Course with provided id not found'})
 
-      return res.json({course: data[0]}).status(200)
+      return res.json(data[0]).status(200)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  })
+
+  // all author courses
+  route.get('/author/:id', async (req, res, next) => {
+    const id = +req.params.id
+    if (!id) return res.status(404).json('Not found')
+
+    const conn = req.app.locals.dbCon
+    try {
+      const data = await conn.query(
+        `SELECT p.*, c.title, c.description, c.status, c.price, 
+        (SELECT u.full_name FROM users AS u WHERE u.id = c.created_by) AS author_name,
+        (SELECT u.email FROM users AS u WHERE u.id = c.created_by) AS author_email
+        FROM products AS p 
+        INNER JOIN courses AS c ON p.course_id = c.id
+        WHERE c.created_by = ${id};
+        `
+      )
+
+      return res.json(data).status(200)
     } catch (err) {
       console.log(err)
       next(err)
@@ -77,8 +104,17 @@ module.exports = (app) => {
         createInsertQuery({table: 'courses', data: courseData}),
         `SELECT @@Identity as id`
       )
-      const newCourse = await conn.query(`SELECT * FROM courses WHERE courses.id = ${data[0]?.id}`)
+      const courseId = data[0]?.id
 
+      await conn.execute(createInsertQuery({table: 'products', data: Product.create({courseId})}))
+
+      const newCourse = await conn.query(`
+        SELECT c.*, u.email AS author_email, u.full_name AS author_name, p.uid
+        FROM ((courses AS c)
+        LEFT JOIN users AS u ON u.id = c.created_by)
+        LEFT JOIN products AS p ON p.course_id = c.id
+        WHERE c.id = ${courseId}
+      `)
       return res.json(newCourse[0])
     } catch (err) {
       console.log(err)
@@ -121,8 +157,6 @@ module.exports = (app) => {
     try {
       await conn.execute(`UPDATE courses AS c SET status = 'published' WHERE c.id = ${courseId}`)
       const updated = await conn.query(`SELECT * FROM courses WHERE courses.id = ${courseId}`)
-
-      conn.execute(createInsertQuery({table: 'products', data: Product.create({courseId})}))
 
       return res.json(updated[0])
     } catch (err) {

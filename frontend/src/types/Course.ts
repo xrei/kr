@@ -4,6 +4,7 @@ export type Course = {
   description: string
   status: string
   price: number
-  author_name: string
+  author_name?: string
+  author_email?: string
   uid: string
 }
