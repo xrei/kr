@@ -1,6 +1,7 @@
-import {createStore, createEffect, createEvent, combine, forward, guard, sample} from 'effector'
+import {createStore, createEffect, createEvent, combine, forward, guard, restore} from 'effector'
 import {ChangeEvent, FormEvent} from 'react'
 import {api} from 'src/api'
+import {history} from 'src/routes'
 import {Course} from 'src/types/Course'
 
 export const $authorCourses = createStore<Course[]>([])
@@ -21,33 +22,38 @@ export const $isLoading = fetchAuthorCoursesFx.pending
 
 $authorCourses.on(fetchAuthorCoursesFx.doneData, (_, p) => p)
 
-$newCourseDialog.on(openDialog, () => true).reset([closeDialog])
-
 type CourseDTO = Pick<Course, 'title' | 'description'>
 export const createNewCourseFx = createEffect<CourseDTO, void>({
   handler: async (courseData) => {
-    const data = await api.courses.create(courseData)
+    const data = (await api.courses.create(courseData)) as Course
     console.log(data)
+    history.push(`/author/course/${data.id}`)
   },
 })
+
+$newCourseDialog.on(openDialog, () => true).reset([closeDialog, createNewCourseFx.done])
 
 export const titleChanged = createEvent<ChangeEvent<HTMLInputElement>>()
 export const descriptionChanged = createEvent<ChangeEvent<HTMLInputElement>>()
 
-export const $title = createStore<string>('').on(titleChanged, (_, ev) => ev.target.value)
+export const $title = createStore<string>('')
+  .on(titleChanged, (_, ev) => ev.target.value)
+  .reset([createNewCourseFx.done])
 
 export const $isTitleValid = $title.map((title) => title.length > 5)
 
-export const $description = createStore<string>('').on(
-  descriptionChanged,
-  (_, ev) => ev.target.value
-)
+export const $description = createStore<string>('')
+  .on(descriptionChanged, (_, ev) => ev.target.value)
+  .reset([createNewCourseFx.done])
+
 export const $isDescriptionValid = $description.map((description) => description.length > 2)
 
 export const $form = combine([$title, $description], ([title, description]) => ({
   title,
   description,
 }))
+
+$form.reset([createNewCourseFx.done])
 
 export const $isSubmitEnabled = combine(
   createNewCourseFx.pending,

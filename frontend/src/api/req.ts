@@ -13,6 +13,7 @@ export const request = (apiBase: string) => (config: RequestConfig) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   })
     .then((r) => {
       console.log(r)

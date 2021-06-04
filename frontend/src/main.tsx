@@ -6,10 +6,8 @@ import {appRoutes, history} from './routes'
 import './index.css'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Router history={history}>
-      <App />
-    </Router>
-  </React.StrictMode>,
+  <Router history={history}>
+    <App />
+  </Router>,
   document.getElementById('root')
 )

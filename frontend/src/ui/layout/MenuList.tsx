@@ -58,8 +58,13 @@ const MenuItem: React.FC<{route: any}> = ({route, children}) => {
 const styles = makeStyles((t: Theme) => ({
   list: {
     width: DrawerWidth,
+    paddingTop: '8px',
+    [t.breakpoints.down('sm')]: {
+      padding: 0,
+    },
   },
   active: {
     color: t.palette.secondary.main,
   },
+  toolbar: t.mixins.toolbar,
 }))

@@ -61,7 +61,9 @@ export const Courses: React.FC = () => {
 const listStyles = makeStyles({
   gridItem: {
     flex: 1,
-    maxWidth: '400px',
+    maxWidth: '320px',
+    minWidth: '260px',
+    minHeight: '160px',
   },
   cardItemNew: {
     display: 'flex',
@@ -115,7 +117,6 @@ const NewCourseDialog: React.FC = () => {
   const descriptionChange = useEvent(model.descriptionChanged)
   const isDisabled = !useStore(model.$isSubmitEnabled)
   const handleSubmit = () => {
-    console.log('pizda')
     model.formSubmitted()
   }
 

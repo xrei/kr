@@ -101,7 +101,7 @@ module.exports = (app) => {
     try {
       console.log(createInsertQuery({table: 'courses', data: courseData}))
       const data = await conn.execute(
-        createInsertQuery({table: 'courses', data: courseData}),
+        createInsertQuery({table: 'courses', data: omit(courseData)}),
         `SELECT @@Identity as id`
       )
       const courseId = data[0]?.id

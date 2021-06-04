@@ -11,4 +11,12 @@ export const api = {
     authorCourses: (id: number) => request({url: `/courses/author/${id}`}),
     create: (payload: any) => request({method: 'POST', url: '/courses/', body: payload}),
   },
+  lessons: {
+    create: (id: number, body: any) =>
+      request({method: 'POST', url: `/courses/${id}/lessons`, body}),
+    list: (id: number) => request({url: `/courses/${id}/lessons/list`}),
+  },
+  auth: {
+    signin: (body: any) => request({method: 'POST', url: '/auth/signin', body}),
+  },
 }

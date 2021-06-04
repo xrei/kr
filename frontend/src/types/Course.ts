@@ -8,3 +8,12 @@ export type Course = {
   author_email?: string
   uid: string
 }
+
+export type CourseLesson = {
+  id: number
+  title: string
+  content: string
+  course_id: number
+}
+
+export type CourseLessonRaw = Omit<CourseLesson, 'id' | 'course_id'>

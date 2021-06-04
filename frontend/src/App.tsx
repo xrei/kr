@@ -4,7 +4,7 @@ import {matchPath} from 'react-router'
 
 import {StylesProvider} from '@material-ui/styles'
 import {ThemeProvider, createMuiTheme} from '@material-ui/core/styles'
-import indigo from '@material-ui/core/colors/indigo'
+import teal from '@material-ui/core/colors/teal'
 import pink from '@material-ui/core/colors/pink'
 import red from '@material-ui/core/colors/red'
 import {appRoutes, history} from './routes'
@@ -13,7 +13,7 @@ import {MainLayout} from './ui/layout/MainLayout'
 function App() {
   const theme = createMuiTheme({
     palette: {
-      primary: indigo,
+      primary: teal,
       secondary: pink,
       error: red,
     },
