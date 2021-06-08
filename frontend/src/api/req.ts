@@ -1,5 +1,5 @@
 type RequestConfig = {
-  method?: 'POST' | 'GET' | 'PUT' | 'DELETE'
+  method?: 'POST' | 'GET' | 'PUT' | 'DELETE' | 'PATCH'
   url: string
   body?: unknown
 }

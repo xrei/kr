@@ -98,7 +98,11 @@ const CourseBlock: React.FC<{course: CourseType}> = (props) => {
       <Grid item xs={12} md={4}>
         <div className={st.statusPaper}>
           {isDraft && (
-            <Button variant="contained" className={st.publishBtn}>
+            <Button
+              variant="contained"
+              className={st.publishBtn}
+              onClick={() => model.publishCourseFx(course.course_id)}
+            >
               Опубликовать
             </Button>
           )}

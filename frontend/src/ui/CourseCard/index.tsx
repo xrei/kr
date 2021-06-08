@@ -18,7 +18,7 @@ export const CourseCard: React.FC<{course: Course; btnTitle?: string; linkPath?:
 ) => {
   const classes = useCardStyles()
   const course = props.course
-  const to = props.linkPath || `/course/${course.id}`
+  const to = props.linkPath || `/course/${course.course_id}`
 
   return (
     <Card className={classes.card} elevation={3}>

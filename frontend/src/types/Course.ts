@@ -7,6 +7,7 @@ export type Course = {
   author_name?: string
   author_email?: string
   uid: string
+  course_id: number
 }
 
 export type CourseLesson = {

@@ -10,6 +10,7 @@ export const api = {
     get: (id: number) => request({url: `/courses/${id}`}),
     authorCourses: (id: number) => request({url: `/courses/author/${id}`}),
     create: (payload: any) => request({method: 'POST', url: '/courses/', body: payload}),
+    publish: (id: number) => request({method: 'PATCH', url: `/courses/${id}/publish`}),
   },
   lessons: {
     create: (id: number, body: any) =>

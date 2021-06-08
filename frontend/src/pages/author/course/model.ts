@@ -23,3 +23,8 @@ export const fetchCourseAndLessonsFx = createEffect<number, void>(async (id) => 
 })
 
 export const $isLoading = fetchCourseAndLessonsFx.pending
+
+export const publishCourseFx = createEffect<number, void>(async (id) => {
+  await api.courses.publish(id)
+  await fetchCourseFx(id)
+})

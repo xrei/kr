@@ -93,7 +93,7 @@ const CoursesList: React.FC = () => {
               <CourseCard
                 course={c}
                 btnTitle="Редактировать"
-                linkPath={`/author/course/${c.id}`}
+                linkPath={`/author/course/${c.course_id}`}
               ></CourseCard>
             </Grid>
           )
