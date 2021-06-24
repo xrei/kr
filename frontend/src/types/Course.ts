@@ -10,6 +10,12 @@ export type Course = {
   course_id: number
 }
 
+export type CourseBody = {
+  title?: string
+  description?: string
+  price?: number
+}
+
 export type CourseLesson = {
   id: number
   title: string

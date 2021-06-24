@@ -41,6 +41,7 @@ export const Course: React.FC = () => {
 const CourseBlock: React.FC<{course: CourseType}> = (props) => {
   const st = courseStyles()
   const {course} = props
+  const draftCourse = useStore(model.$draftCourse)
   const isDraft = useStore(model.$isDraft)
   const isPublished = useStore(model.$isPublished)
   const courseLessons = useStore(lessonModel.$courseLessons)
@@ -53,26 +54,28 @@ const CourseBlock: React.FC<{course: CourseType}> = (props) => {
         </Typography>
         <div className={st.mb4}>
           <TextField
-            value={course.title}
+            value={draftCourse.title}
             label="Название курса:"
             placeholder="Введите название курса"
             fullWidth
+            onChange={(event) => model.editCourseField({title: event.target.value})}
           ></TextField>
         </div>
         <div className={st.mb4}>
           <TextField
-            value={course.description}
+            value={draftCourse.description}
             label="Описаение курса:"
             placeholder="Введите описание курса"
             fullWidth
             variant="outlined"
             multiline
             rows={3}
+            onChange={(event) => model.editCourseField({description: event.target.value})}
           ></TextField>
         </div>
         <div className={st.mb4}>
           <TextField
-            value={course.price}
+            value={draftCourse.price}
             label="Цена:"
             placeholder="Введите цену"
             fullWidth
@@ -84,12 +87,13 @@ const CourseBlock: React.FC<{course: CourseType}> = (props) => {
                 </InputAdornment>
               ),
             }}
+            onChange={(event) => model.editCourseField({price: Number(event.target.value)})}
           ></TextField>
         </div>
 
         <div>
           <Typography variant="h5">Уроки курса:</Typography>
-          <CourseNewLesson courseId={course.id}></CourseNewLesson>
+          <CourseNewLesson courseId={course.course_id}></CourseNewLesson>
           {courseLessons.map((cl) => {
             return <CourseLesson key={cl.id} lesson={cl}></CourseLesson>
           })}

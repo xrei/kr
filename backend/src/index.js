@@ -11,7 +11,12 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(function (req, res, next) {
   const origin = req.headers.origin
-  const allowed = ['http://localhost:3000', 'http://localhost:3020', 'http://127.0,0,1:3000']
+  const allowed = [
+    'http://localhost:3000',
+    'http://localhost:3020',
+    'http://127.0,0,1:3000',
+    'http://localhost:5000',
+  ]
   console.log(origin)
   if (allowed.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin)
